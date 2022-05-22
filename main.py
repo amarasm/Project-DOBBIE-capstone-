@@ -9,8 +9,8 @@ GPIO.setmode(GPIO.BCM)
 
 
 #setting up the LED
-led1 = 10           #shown in the circuit
-ledr1 = 22          #shown in the circuit
+led1 = 10
+ledr1 = 22
 
 led2 = 15
 ledr2 = 14
@@ -23,14 +23,13 @@ GPIO.setup(ledr2, GPIO.OUT)
 
 
 #Setting up the motors
-en1=13          #shown in the circuit
-m11=20          #shown in the circuit
-m12=21          #shown in the circuit
-m21=16          #shown in the circuit
-m22=5           #shown in the circuit
+en1=13
+m21=16
+m22=5
+m11=20
+m12=21
 
-
-en2=12          #shown in the circuit
+en2=12
 m31=9
 m32=11
 m41=7
@@ -56,10 +55,10 @@ p2=GPIO.PWM(en2, 100)
 
 
 # setting up the ultrasonic sensors
-TRIG = 17           #shown in the circuit
-ECHO = 18           #shown in the circuit
-TRIG1 = 26          #shown in the circuit
-ECHO1 = 19          #shown in the circuit
+TRIG = 17
+ECHO = 18
+TRIG1 = 26
+ECHO1 = 19
 
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
@@ -67,9 +66,9 @@ GPIO.setup(TRIG1, GPIO.OUT)
 GPIO.setup(ECHO1, GPIO.IN)
 
 #setting up the MH sensors series
-ls = 23         #shown in the circuit
-ms = 24         #shown in the circuit
-rs = 25         #shown in the circuit
+ls = 23
+ms = 24
+rs = 25
 
 GPIO.setup(ls, GPIO.IN)
 GPIO.setup(ms, GPIO.IN)
@@ -77,24 +76,11 @@ GPIO.setup(rs, GPIO.IN)
 
 
 #setting up the colorsensor
-i2c = board.I2C()           #shown in the circuit
+i2c = board.I2C()
 sensor = adafruit_tcs34725.TCS34725(i2c)
 
 
-
-color = sensor.color
-color_rgb = sensor.color_rgb_bytes
-
-HEX = "#{0:02X}".format(color)
-
-print("RGB color as 8 bits per channel int: #{0:02X} or as 3-tuple: {1}".format(color, color_rgb))
-RGB = ("{0}, {1}, {2}".format(*color_rgb))
-
-a = int(RGB.split(",")[0])
-b = int(RGB.split(",")[1])
-c = int(RGB.split(",")[2])
-
-#Ddfining LED function
+#defining LED function
 def LED():
     for x in range(4):
         GPIO.output(led1, 1)
@@ -184,7 +170,7 @@ def sright():
     GPIO.output(m12, 0)
     GPIO.output(m41, 1)
     GPIO.output(m42, 0)
-    p1.ChangeDutyCycle(75)
+    p1.ChangeDutyCycle(25)
 
     GPIO.output(en1, 1)
 
@@ -192,7 +178,7 @@ def sright():
     GPIO.output(m22, 0)
     GPIO.output(m31, 1)
     GPIO.output(m32, 0)
-    p2.ChangeDutyCycle(25)
+    p2.ChangeDutyCycle(0)
 
     GPIO.output(en2, 1)
 
@@ -207,7 +193,7 @@ def sleft():
     GPIO.output(m12, 0)
     GPIO.output(m41, 1)
     GPIO.output(m42, 0)
-    p1.ChangeDutyCycle(25)
+    p1.ChangeDutyCycle(0)
 
     GPIO.output(en1, 1)
 
@@ -215,7 +201,7 @@ def sleft():
     GPIO.output(m22, 0)
     GPIO.output(m31, 1)
     GPIO.output(m32, 0)
-    p2.ChangeDutyCycle(75)
+    p2.ChangeDutyCycle(25)
 
     GPIO.output(en2, 1)
 
@@ -228,14 +214,15 @@ def lf():
     p2.start(0)
 
     stop()
-    p1.ChangeDutyCycle(75)
-    p2.ChangeDutyCycle(75)
+    p1.ChangeDutyCycle(25)
+    p2.ChangeDutyCycle(25)
 
     GPIO.output(en1, 1)
     GPIO.output(en2, 1)
 
     forward()
-    time.sleep(2)
+    time.sleep(1.5)
+    stop()
 
     while True:
         if GPIO.input(ms) and not GPIO.input(ls) and not GPIO.input(rs):
@@ -250,14 +237,15 @@ def lf():
             GPIO.output(en2, 0)
 
             forward()
-            p1.ChangeDutyCycle(75)
-            p2.ChangeDutyCycle(75)
+            p1.ChangeDutyCycle(25)
+            p2.ChangeDutyCycle(25)
             GPIO.output(en1, 1)
             GPIO.output(en2, 1)
 
             time.sleep(2)
         else:
             if GPIO.input(ls):
+                stop()
                 print("ALERT: Left wheels are on the black line!")
                 GPIO.output(ledr1, 1)
                 GPIO.output(led1, 0)
@@ -275,14 +263,15 @@ def lf():
                 GPIO.output(en2, 0)
 
                 forward()
-                p1.ChangeDutyCycle(50)
-                p2.ChangeDutyCycle(50)
+                p1.ChangeDutyCycle(25)
+                p2.ChangeDutyCycle(25)
 
                 GPIO.output(en1, 1)
                 GPIO.output(en2, 1)
 
                 time.sleep(2)
             elif GPIO.input(rs):
+                stop()
                 print("ALERT: Right wheels are on the black line!")
                 GPIO.output(ledr1, 1)
                 GPIO.output(led1, 0)
@@ -300,8 +289,8 @@ def lf():
                 GPIO.output(en2, 0)
 
                 forward()
-                p1.ChangeDutyCycle(50)
-                p2.ChangeDutyCycle(50)
+                p1.ChangeDutyCycle(25)
+                p2.ChangeDutyCycle(25)
 
                 GPIO.output(en1, 1)
                 GPIO.output(en2, 1)
@@ -314,7 +303,16 @@ def lf():
                 GPIO.output(led1, 0)
                 GPIO.output(ledr2, 1)
                 GPIO.output(led2, 0)
-                colorsensors()
+
+                color = sensor.color
+                color_rgb = sensor.color_rgb_bytes
+
+                HEX = "#{0:02X}".format(color)
+                RGB = ("{0}, {1}, {2}".format(*color_rgb))
+
+                a = int(RGB.split(",")[0])
+                b = int(RGB.split(",")[1])
+                c = int(RGB.split(",")[2])
                 if HEX != "#00":
                     if a < 125 and a == b == c:
                         print("Something is wrong.")
@@ -324,17 +322,55 @@ def lf():
                         print("Go back to the beginning.")
                         break
 
-                    elif 0 < a < 70 and b > 70 and c > 70:
+                    elif (0 < a < 70 and b > 70 and c > 70) or (0 < a < 70 and b == c):
                         print("You've reached the first station.")
+                        answer1 = input("If you want to continue type Y, if not type N.")
+                        if answer1 == "Y":
+                            print("We're going forward.")
+                            forward()
+                            continue
+                        elif answer1 == "N":
+                            print("We're stopping.")
+                            stop()
+                            break
+                        else:
+                            print("Something went wrong. Please try again.")
+                            break
+
 
                     elif a > 70 and b > 30 and c < 25:
                         print("You've reached the last station.")
+                        answer2 = input("If you want to continue type Y, if not type N.")
+                        if answer2 == "Y":
+                            print("We're going forward.")
+                            forward()
+                            continue
+                        elif answer2 == "N":
+                            print("We're stopping.")
+                            stop()
+                            break
+                        else:
+                            print("Something went wrong. Please try again")
+                            break
+
 
                     elif a > 70 and b < 25 and c < 25:
                         print("You've reached the second station.")
+                        answer3 = input("If you want to continue type Y, if not type N")
+                        if answer3 == "Y":
+                            print("We're going forward.")
+                            forward()
+                            continue
+                        elif answer3 == "N":
+                            print("We're stopping.")
+                            stop()
+                            break
+                        else:
+                            print("Something went wrong. Please try again.")
+                            break
 
                     else:
-                        print("undetected color")
+                        print("undetected color", RGB)
                         break
 
                 else:
@@ -344,6 +380,19 @@ def lf():
 #defining the main function
 def main():
     LED()
+    p1.start(0)
+    p2.start(0)
+
+    stop()
+    p1.ChangeDutyCycle(25)
+    p2.ChangeDutyCycle(25)
+
+    GPIO.output(en1, 1)
+    GPIO.output(en2, 1)
+
+    forward()
+    time.sleep(2)
+    stop()
     count = 0
     while count < 31:
         avgDistance = 0
@@ -407,11 +456,13 @@ def main():
             p2.start(0)
 
             stop()
+            time.sleep(3)
 
-            p1.ChangeDutyCycle(75)
-            p2.ChangeDutyCycle(75)
+            p1.ChangeDutyCycle(25)
+            p2.ChangeDutyCycle(25)
 
             forward()
+
 
             GPIO.output(en1, 1)
             GPIO.output(en2, 1)
@@ -419,6 +470,7 @@ def main():
 
             count = count + 1
             if avgDistance1 < 15:
+                stop()
                 print("ALERT: Right sensor has encountered an object!")
                 GPIO.output(led1, 0)
                 GPIO.output(ledr1, 1)
@@ -435,6 +487,7 @@ def main():
                 time.sleep(1)
 
             elif avgDistance < 15:
+                stop()
                 print("ALERT: Left sensor has encountered an object!")
                 GPIO.output(led1, 0)
                 GPIO.output(ledr1, 1)
